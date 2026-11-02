@@ -1,0 +1,884 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delivery Desk Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    .assignment-control {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 130px;
+    }
+
+    .assignment-control select,
+    .fee-control input,
+    .fee-control select {
+      max-width: 190px;
+      width: 100%;
+      padding: 9px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      box-sizing: border-box;
+    }
+
+    .assignment-control button,
+    .fee-control button {
+      width: fit-content;
+    }
+
+    .fee-control {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 130px;
+    }
+
+    .fee-display {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-label {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 20px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      text-transform: capitalize;
+    }
+
+    #dashboardMessage {
+      margin: 15px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .table-wrap table {
+      min-width: 1150px;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body class="dashboard-bg">
+
+<aside class="sidebar">
+
+  <a class="brand" href="index.html">
+    <span class="brand-mark">D</span>
+    <span>delivery<span class="brand-light">desk</span></span>
+  </a>
+
+  <div class="workspace-label">WORKSPACE</div>
+
+  <div class="workspace-name">
+    <span class="workspace-icon">⌂</span>
+    <span id="workspaceName">Loading...</span>
+  </div>
+
+  <nav class="side-nav">
+    <small>WORKSPACE</small>
+
+    <a class="active" href="#overview">▦ <span>Overview</span></a>
+    <a href="#deliveries">▣ <span>Deliveries</span></a>
+    <a href="#payments">＄ <span>Payments</span></a>
+    <a href="#team" id="teamNav">♙ <span>Team members</span></a>
+
+    <small id="manageLabel">MANAGE</small>
+    <a href="#settings" id="settingsNav">⚙ <span>Settings</span></a>
+    <a href="payouts.html">＄ <span>Payouts</span></a>
+  </nav>
+
+  <div class="sidebar-bottom">
+
+    <div class="profile-mini">
+      <span class="avatar">DD</span>
+      <div>
+        <b id="sideUser">Loading...</b>
+        <small id="sideRole">Checking account...</small>
+      </div>
+    </div>
+
+    <button id="logoutBtn" class="logout-btn">
+      ↪ Sign out
+    </button>
+
+  </div>
+</aside>
+
+<main class="dash-main" id="overview">
+
+  <header class="dash-header">
+    <div>
+      <span class="eyebrow">DELIVERY DESK WORKSPACE</span>
+      <h1 id="welcomeTitle">Loading dashboard...</h1>
+      <p id="welcomeDescription">Retrieving workspace information.</p>
+    </div>
+
+    <a class="btn btn-primary btn-small"
+       href="delivery.html"
+       target="_blank">
+      + New delivery request
+    </a>
+  </header>
+
+  <section class="stat-grid">
+
+    <article class="stat-card">
+      <div class="stat-top">Total deliveries</div>
+      <strong id="totalCount">0</strong>
+      <small>Accessible delivery requests</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">Awaiting review</div>
+      <strong id="pendingCount">0</strong>
+      <small>New customer requests</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">Completed</div>
+      <strong id="completedCount">0</strong>
+      <small>Successfully delivered</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-top">Account role</div>
+      <strong id="roleStat">-</strong>
+      <small>Workspace permissions</small>
+    </article>
+
+  </section>
+
+  <section class="panel" id="deliveries">
+
+    <div class="panel-head">
+      <div>
+        <h2>Delivery requests</h2>
+        <p>Monitor and manage delivery requests and charges.</p>
+      </div>
+
+      <span class="table-count" id="tableCount">0 requests</span>
+    </div>
+
+    <div class="table-wrap">
+
+      <table>
+        <thead>
+          <tr>
+            <th>REQUEST</th>
+            <th>CUSTOMER</th>
+            <th>DESTINATION</th>
+            <th>PAYMENT METHOD</th>
+            <th>DELIVERY FEE</th>
+            <th>STATUS</th>
+            <th>ASSIGNED EMPLOYEE</th>
+          </tr>
+        </thead>
+
+        <tbody id="deliveryRows">
+          <tr>
+            <td colspan="7" class="empty-cell">
+              Loading deliveries...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </section>
+
+  <section class="lower-grid">
+
+    <article class="panel" id="payments">
+      <div class="panel-head">
+        <div>
+          <h2>Payment overview</h2>
+          <p>Payment processing information.</p>
+        </div>
+      </div>
+
+      <div class="empty-state">
+        <span>＄</span>
+        <b>Flutterwave integration</b>
+        <p>
+          Delivery fees can now be saved by the owner.
+          Actual card and bank transfer processing will be
+          enabled after the Flutterwave checkout and verified
+          webhook integration is completed.
+        </p>
+      </div>
+    </article>
+
+    <article class="panel" id="team">
+      <div class="panel-head">
+        <div>
+          <h2>Team access</h2>
+          <p>Workspace account information.</p>
+        </div>
+      </div>
+
+      <div class="team-row">
+        <span class="avatar">DD</span>
+        <div>
+          <b id="teamAccountName">Your account</b>
+          <small id="teamAccountRole">Workspace account</small>
+        </div>
+        <span class="pill pill-green">Active</span>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="panel settings-panel" id="settings">
+    <div class="panel-head">
+      <div>
+        <h2>Workspace settings</h2>
+        <p>Workspace administration information.</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+
+      <div>
+        <small>Workspace</small>
+        <b id="settingsWorkspace">Loading...</b>
+      </div>
+
+      <div>
+        <small>Account role</small>
+        <b id="settingsRole">Loading...</b>
+      </div>
+
+      <div>
+        <small>Account status</small>
+        <b>Active</b>
+      </div>
+
+    </div>
+  </section>
+
+  <p id="dashboardMessage" role="status"></p>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+
+<script>
+(async function () {
+
+  const rows = document.getElementById("deliveryRows");
+  const message = document.getElementById("dashboardMessage");
+  const logoutButton = document.getElementById("logoutBtn");
+
+  let db;
+  let user;
+  let profile;
+  let workspace;
+  let isOwner = false;
+
+  const currencies = [
+    "NGN", "USD", "GBP", "EUR", "CAD",
+    "AUD", "GHS", "KES", "ZAR"
+  ];
+
+  function showError(text) {
+    message.textContent = text;
+    message.style.color = "#b42318";
+  }
+
+  function showSuccess(text) {
+    message.textContent = text;
+    message.style.color = "green";
+  }
+
+  function setLoading(text) {
+    rows.innerHTML = "";
+
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+
+    td.colSpan = 7;
+    td.className = "empty-cell";
+    td.textContent = text;
+
+    tr.appendChild(td);
+    rows.appendChild(tr);
+  }
+
+  function formatStatus(status) {
+    const labels = {
+      new: "New",
+      confirmed: "Confirmed",
+      assigned: "Assigned",
+      accepted: "Accepted",
+      picked_up: "Picked up",
+      in_transit: "In transit",
+      delivered: "Delivered",
+      cancelled: "Cancelled",
+      failed: "Failed delivery"
+    };
+
+    return labels[status] || status || "Unknown";
+  }
+
+  function addCell(tr, value) {
+    const td = document.createElement("td");
+    td.textContent = value || "-";
+    tr.appendChild(td);
+    return td;
+  }
+
+  function formatFee(amount, currency) {
+    if (amount === null || amount === undefined) {
+      return "Not set";
+    }
+
+    return Number(amount).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + " " + (currency || "NGN");
+  }
+
+  function createFeeControl(delivery, refreshDeliveries) {
+
+    const control = document.createElement("div");
+    control.className = "fee-control";
+
+    const amountInput = document.createElement("input");
+    amountInput.type = "number";
+    amountInput.min = "0.01";
+    amountInput.step = "0.01";
+    amountInput.placeholder = "Enter fee";
+    amountInput.value =
+      delivery.delivery_fee !== null
+        ? delivery.delivery_fee
+        : "";
+
+    amountInput.setAttribute("aria-label", "Delivery fee");
+
+    const currencySelect = document.createElement("select");
+    currencySelect.setAttribute("aria-label", "Fee currency");
+
+    currencies.forEach(function (currency) {
+      const option = document.createElement("option");
+      option.value = currency;
+      option.textContent = currency;
+      currencySelect.appendChild(option);
+    });
+
+    currencySelect.value =
+      currencies.includes(delivery.delivery_currency)
+        ? delivery.delivery_currency
+        : "NGN";
+
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.className = "btn btn-primary btn-small";
+    saveButton.textContent = "Save fee";
+
+    saveButton.addEventListener("click", async function () {
+
+      const amount = Number(amountInput.value);
+      const currency = currencySelect.value;
+
+      if (
+        !amountInput.value.trim() ||
+        !Number.isFinite(amount) ||
+        amount <= 0
+      ) {
+        showError("Enter a valid delivery fee greater than zero.");
+        amountInput.focus();
+        return;
+      }
+
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving...";
+
+      try {
+
+        const { data: updated, error: updateError } =
+          await db
+            .from("deliveries")
+            .update({
+              delivery_fee: amount,
+              delivery_currency: currency
+            })
+            .eq("id", delivery.id)
+            .eq("workspace_id", profile.workspace_id)
+            .select("id");
+
+        if (updateError) throw updateError;
+
+        if (!updated || updated.length === 0) {
+          throw new Error(
+            "The fee was not saved. Check your owner permissions."
+          );
+        }
+
+        showSuccess(
+          "Delivery fee saved: " + formatFee(amount, currency)
+        );
+
+        await loadDeliveries();
+
+      } catch (err) {
+
+        showError("Fee save failed: " + err.message);
+
+        saveButton.disabled = false;
+        saveButton.textContent = "Save fee";
+      }
+    });
+
+    control.appendChild(amountInput);
+    control.appendChild(currencySelect);
+    control.appendChild(saveButton);
+
+    return control;
+  }
+
+  try {
+
+    const config = window.DELIVERY_DESK_CONFIG;
+
+    if (
+      !config ||
+      !config.SUPABASE_URL ||
+      !config.SUPABASE_ANON_KEY ||
+      !window.supabase
+    ) {
+      throw new Error(
+        "Supabase configuration is missing. Check assets/config.js."
+      );
+    }
+
+    db = window.supabase.createClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_ANON_KEY
+    );
+
+    logoutButton.addEventListener("click", async function () {
+
+      logoutButton.disabled = true;
+      logoutButton.textContent = "Signing out...";
+
+      const { error } = await db.auth.signOut();
+
+      if (error) {
+        showError("Sign out failed: " + error.message);
+        logoutButton.disabled = false;
+        logoutButton.textContent = "↪ Sign out";
+        return;
+      }
+
+      window.location.replace("login.html");
+    });
+
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    if (!sessionData.session) {
+      window.location.replace("login.html");
+      return;
+    }
+
+    user = sessionData.session.user;
+
+    const { data: profileData, error: profileError } =
+      await db
+        .from("user_profiles")
+        .select("role, workspace_id, display_name, is_active")
+        .eq("user_id", user.id)
+        .single();
+
+    if (profileError) throw profileError;
+
+    profile = profileData;
+
+    if (
+      !profile ||
+      !profile.is_active ||
+      !["owner", "employee"].includes(profile.role)
+    ) {
+      await db.auth.signOut();
+      window.location.replace("login.html");
+      return;
+    }
+
+    isOwner = profile.role === "owner";
+
+    const { data: workspaceData, error: workspaceError } =
+      await db
+        .from("workspaces")
+        .select("name")
+        .eq("id", profile.workspace_id)
+        .single();
+
+    if (workspaceError) throw workspaceError;
+
+    workspace = workspaceData;
+
+    const displayName =
+      profile.display_name ||
+      (user.email ? user.email.split("@")[0] : "User");
+
+    document.getElementById("workspaceName").textContent =
+      workspace.name;
+
+    document.getElementById("sideUser").textContent =
+      displayName;
+
+    document.getElementById("sideRole").textContent =
+      isOwner ? "Owner account" : "Employee account";
+
+    document.getElementById("welcomeTitle").textContent =
+      "Welcome, " + displayName;
+
+    document.getElementById("welcomeDescription").textContent =
+      isOwner
+        ? "Manage your delivery workspace."
+        : "Manage your assigned delivery requests.";
+
+    document.getElementById("roleStat").textContent =
+      isOwner ? "Owner" : "Employee";
+
+    document.getElementById("teamAccountName").textContent =
+      displayName;
+
+    document.getElementById("teamAccountRole").textContent =
+      profile.role;
+
+    document.getElementById("settingsWorkspace").textContent =
+      workspace.name;
+
+    document.getElementById("settingsRole").textContent =
+      profile.role;
+
+    if (!isOwner) {
+      document.getElementById("teamNav").style.display = "none";
+      document.getElementById("settingsNav").style.display = "none";
+      document.getElementById("manageLabel").style.display = "none";
+      document.getElementById("team").style.display = "none";
+      document.getElementById("settings").style.display = "none";
+    }
+
+    async function loadDeliveries() {
+
+      setLoading("Loading deliveries...");
+
+      let employees = [];
+
+      if (isOwner) {
+
+        const { data: employeeData, error: employeeError } =
+          await db
+            .from("user_profiles")
+            .select("user_id, display_name")
+            .eq("workspace_id", profile.workspace_id)
+            .eq("role", "employee")
+            .eq("is_active", true)
+            .order("display_name");
+
+        if (employeeError) throw employeeError;
+
+        employees = employeeData || [];
+      }
+
+      let query = db
+        .from("deliveries")
+        .select(
+          "id, workspace_id, public_reference, customer_first_name, customer_last_name, city, country, preferred_payment_method, status, assigned_employee_id, created_at, delivery_fee, delivery_currency"
+        )
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (!isOwner) {
+        query = query.eq("assigned_employee_id", user.id);
+      }
+
+      const { data: deliveries, error: deliveryError } =
+        await query;
+
+      if (deliveryError) throw deliveryError;
+
+      rows.innerHTML = "";
+
+      if (!deliveries || deliveries.length === 0) {
+
+        setLoading(
+          isOwner
+            ? "No delivery requests found."
+            : "No deliveries have been assigned to you yet."
+        );
+
+      } else {
+
+        deliveries.forEach(function (delivery) {
+
+          const tr = document.createElement("tr");
+
+          addCell(tr, delivery.public_reference);
+
+          addCell(
+            tr,
+            [
+              delivery.customer_first_name,
+              delivery.customer_last_name
+            ].filter(Boolean).join(" ")
+          );
+
+          addCell(
+            tr,
+            [
+              delivery.city,
+              delivery.country
+            ].filter(Boolean).join(", ")
+          );
+
+          addCell(
+            tr,
+            delivery.preferred_payment_method
+          );
+
+          const feeCell = document.createElement("td");
+
+          if (isOwner) {
+
+            feeCell.appendChild(createFeeControl(delivery));
+
+          } else {
+
+            const feeDisplay = document.createElement("span");
+            feeDisplay.className = "fee-display";
+            feeDisplay.textContent = formatFee(
+              delivery.delivery_fee,
+              delivery.delivery_currency
+            );
+
+            feeCell.appendChild(feeDisplay);
+          }
+
+          tr.appendChild(feeCell);
+
+          const statusCell = document.createElement("td");
+          const statusBadge = document.createElement("span");
+
+          statusBadge.className = "status-label";
+          statusBadge.textContent = formatStatus(delivery.status);
+
+          statusCell.appendChild(statusBadge);
+          tr.appendChild(statusCell);
+
+          const assignmentCell = document.createElement("td");
+
+          if (isOwner) {
+
+            const control = document.createElement("div");
+            control.className = "assignment-control";
+
+            const select = document.createElement("select");
+
+            const unassigned = document.createElement("option");
+            unassigned.value = "";
+            unassigned.textContent = "Unassigned";
+
+            select.appendChild(unassigned);
+
+            employees.forEach(function (employee) {
+
+              const option = document.createElement("option");
+
+              option.value = employee.user_id;
+              option.textContent =
+                employee.display_name || "Employee";
+
+              select.appendChild(option);
+            });
+
+            select.value =
+              delivery.assigned_employee_id || "";
+
+            const assignButton = document.createElement("button");
+
+            assignButton.type = "button";
+            assignButton.className = "btn btn-primary btn-small";
+            assignButton.textContent = "Assign";
+
+            assignButton.addEventListener("click", async function () {
+
+              assignButton.disabled = true;
+              assignButton.textContent = "Saving...";
+
+              try {
+
+                const { data: updated, error: updateError } =
+                  await db
+                    .from("deliveries")
+                    .update({
+                      assigned_employee_id: select.value || null
+                    })
+                    .eq("id", delivery.id)
+                    .eq("workspace_id", profile.workspace_id)
+                    .select("id");
+
+                if (updateError) throw updateError;
+
+                if (!updated || updated.length === 0) {
+                  throw new Error(
+                    "No delivery was updated. Check your database permissions."
+                  );
+                }
+
+                showSuccess("Employee assignment saved.");
+
+                await refreshDeliveries();
+
+              } catch (err) {
+
+                showError("Assignment failed: " + err.message);
+
+                assignButton.disabled = false;
+                assignButton.textContent = "Assign";
+              }
+            });
+
+            control.appendChild(select);
+            control.appendChild(assignButton);
+
+            assignmentCell.appendChild(control);
+
+          } else {
+
+            const control = document.createElement("div");
+            control.className = "assignment-control";
+
+            const statusSelect = document.createElement("select");
+
+            const allowedStatuses = [
+              { value: "accepted", label: "Accepted" },
+              { value: "picked_up", label: "Picked up" },
+              { value: "in_transit", label: "In transit" },
+              { value: "delivered", label: "Delivered" },
+              { value: "failed", label: "Failed delivery" }
+            ];
+
+            allowedStatuses.forEach(function (status) {
+
+              const option = document.createElement("option");
+
+              option.value = status.value;
+              option.textContent = status.label;
+
+              statusSelect.appendChild(option);
+            });
+
+            const currentStatusExists = allowedStatuses.some(
+              status => status.value === delivery.status
+            );
+
+            statusSelect.value = currentStatusExists
+              ? delivery.status
+              : "accepted";
+
+            const updateButton = document.createElement("button");
+
+            updateButton.type = "button";
+            updateButton.className = "btn btn-primary btn-small";
+            updateButton.textContent = "Update status";
+
+            updateButton.addEventListener("click", async function () {
+
+              updateButton.disabled = true;
+              updateButton.textContent = "Saving...";
+
+              try {
+
+                const { error: rpcError } = await db.rpc(
+                  "employee_update_delivery_status",
+                  {
+                    p_delivery_id: delivery.id,
+                    p_new_status: statusSelect.value
+                  }
+                );
+
+                if (rpcError) throw rpcError;
+
+                showSuccess(
+                  "Delivery status updated successfully."
+                );
+
+                await loadDeliveries();
+
+              } catch (err) {
+
+                showError(
+                  "Status update failed: " + err.message
+                );
+
+                updateButton.disabled = false;
+                updateButton.textContent = "Update status";
+              }
+            });
+
+            control.appendChild(statusSelect);
+            control.appendChild(updateButton);
+
+            assignmentCell.appendChild(control);
+          }
+
+          tr.appendChild(assignmentCell);
+          rows.appendChild(tr);
+
+        });
+      }
+
+      document.getElementById("totalCount").textContent =
+        deliveries.length;
+
+      document.getElementById("pendingCount").textContent =
+        deliveries.filter(d => d.status === "new").length;
+
+      document.getElementById("completedCount").textContent =
+        deliveries.filter(d => d.status === "delivered").length;
+
+      document.getElementById("tableCount").textContent =
+        deliveries.length + " requests";
+    }
+
+    await loadDeliveries();
+
+  } catch (err) {
+
+    console.error("Dashboard error:", err);
+
+    showError(
+      "Dashboard error: " +
+      (err.message || "An unexpected error occurred.")
+    );
+
+    setLoading("Unable to load deliveries. Check the error message below.");
+  }
+
+})();
+</script>
+
+</body>
+</html>
